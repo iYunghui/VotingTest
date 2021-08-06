@@ -1,0 +1,23 @@
+#top-question{
+    margin-top: 20px;
+}
+img {
+    max-width: 100%;
+    max-height: 100%;
+}
+textarea{
+    font-weight: bold;
+    width: 100%;
+    text-align:center;
+}
+input{
+    font-weight: bold;
+    width: 100%;
+    text-align:center;
+}
+button{
+    /*border: 1px solid black !important;*/
+}
+body{
+    background-color: #f2f1f3;
+}

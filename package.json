@@ -1,0 +1,33 @@
+{
+	"name": "Voting",
+	"version": "1.0.0",
+	"description": "Web voting plugin",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/IoTtalk/Vote.git"
+	},
+	"license": "",
+	"private": true,
+	"dependencies": {
+		"basic-auth": "^2.0.1",
+		"bufferutil": "^4.0.3",
+		"cookie-parser": "^1.4.5",
+		"ejs": "^3.1.6",
+		"express": "^4.17.1",
+		"express-session": "^1.17.2",
+		"iottalk-js": "^2.3.1",
+		"mqtt": "^4.2.8",
+		"mysql2": "",
+		"passport": "^0.4.1",
+		"passport-facebook": "^3.0.0",
+		"passport-google-oauth": "^2.0.0",
+		"request": "^2.88.2",
+		"sequelize": "^6.6.5",
+		"serve-favicon": "^2.5.0",
+		"socket.io": "^4.0.1",
+		"socket.io-client": "^4.1.3",
+		"sqlite3": "^4.0.6",
+		"superagent": "^6.1.0",
+		"utf-8-validate": "^5.0.5"
+	}
+}

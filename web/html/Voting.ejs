@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/Voting.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.slim.js"></script>
+    <script src="/js/ejs.min.js"></script>
+    <script src="/js/Utilities.js"></script>
+    <script src="/js/Voting.js"></script>
+    <script>
+        <% if (typeof va != 'undefined') { %>
+            var va = "<%= va %>";
+        <% } else { %>
+            var va = undefined;
+        <% } %>
+        var anonymous = ("<%= anonymous %>" === "true"),
+            useDisqus = ("<%= useDisqus %>" === "true");
+    </script>
+    <title>Voting</title>
+</head>
+<body>
+    <% if (useDisqus == true) { %>
+    <script>
+        (function() { // DON'T EDIT BELOW THIS LINE
+            let d = document, s = d.createElement('script');
+            s.src = 'https://vote-4.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <% } %>
+    
+    <div class="container page_vertical_center">
+        <div class="row justify-content-center">
+            <div class="col-md-4 col-1 col-sm-3"></div>
+            <div class="col-md-4 col-10 col-sm-6">
+                <div class="row justify-content-center">
+                    <div id="welcome" class="element_vertical_center">
+                        <div class="text-center">
+                            <h2 id="welcomeText">歡迎來到 AiPoll</h2>
+                        </div>
+                        <div class="text-center">
+                            <h4 id="promptText">投票準備中</h4>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" id="startBtn" class="btn btn-info btn-lg" disabled>等待開放</button>
+                        </div>
+                    </div>
+                    <div id="interact">
+                        <div class="onl_login">
+                            <div class="row onl_row-sm-offset-4 onl_socialButtons">
+                                <div class="col-xs-4 col-sm-6">
+                                    <a href="#" class="btn btn-lg btn-block onl_btn-facebook" data-toggle="tooltip" data-placement="top" title="Facebook">
+                                        <i class="fa fa-facebook fa-2x"></i>
+                                        <span class="hidden-xs"></span>
+                                    </a>
+                                </div>
+                                <div class="col-xs-4 col-sm-6">
+                                    <a href="#" class="btn btn-lg btn-block onl_btn-google-plus" data-toggle="tooltip" data-placement="top" title="Google Plus">
+                                        <i class="fa fa-google-plus fa-2x"></i>
+                                        <span class="hidden-xs"></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="question_div">
+                            <h2 id="question"></h2>
+                            <% if (typeof n != 'undefined') { %>
+                                <h6 id="name"><%= n %></h6>
+                            <% } %>
+                        </div>
+                        <div id="options">
+                        </div>
+                        <div class="col-xs-4" align="center">
+                            <div id="next" class="btn-circle" disabled>
+                                <h4 id="next_msg" style="font-weight:bold">已收到您的投票</h4>
+                                <h6 style="font-weight:300">>>> 稍後將開啟下輪投票 >>></h6>
+                            </div>
+                        </div>
+                    <% if (useDisqus == true) { %>
+                        <div id="disqus_thread"></div>
+                        <% } %>
+                    </div>
+                    <div id="end" class="element_vertical_center">
+                        <div class="text-center">
+                            <h2>謝謝參與 Nonuments!</h2>
+                            <h2>祝你有美好的一天!</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-1 col-sm-3"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,105 @@
+button{
+    color: white;
+    width: 100%;
+    margin:1rem 0px 1rem 0px; 
+    font-size: 1.5rem!important;
+}
+.badge{
+    float: right;
+}
+body{
+    /* background-color: #f2f1f3; */
+    background-color: rgb(211,211,211);
+}
+#disqus_thread{
+	margin-top: 50px;
+}
+#end{
+    visibility: hidden;
+    /* width:500px;
+    height:200px;
+    left:50%;
+    top:50%;
+    margin:-100px 0 0 0px;
+    font-weight: bold; */
+}
+#next{
+    visibility: hidden;
+}
+#interact{
+    visibility: hidden;
+}
+#welcome{
+    /* margin: 0;
+    position: absolute;
+    top: 50%; */
+    visibility: hidden;
+    /*-ms-transform: translateY(-50%);*/
+    /*transform: translateY(-50%);*/
+}
+#startBtn {
+    margin-top: 20px;
+}
+#promptText {
+    color: darkcyan;
+}
+#question_div{
+    text-align:center;
+}
+.page_vertical_center{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
+}
+.element_vertical_center{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* the button's color */
+#options>button:first-child {
+    background-color: rgb(214,158,2);
+}
+#options>button:nth-child(2) {
+    background-color: rgb(1,27,118);
+}
+#options>button:nth-child(3) {
+    background-color: rgb(175,7,7);
+}
+#options>button:nth-child(4) {
+    background-color: rgb(60,121,4);
+}
+
+/* the disabled button's color */
+#options>button:first-child[disabled] {
+    background-color: rgb(242,203,95);
+}
+#options>button:nth-child(2)[disabled] {
+    background-color: rgb(146,155,185);
+}
+#options>button:nth-child(3)[disabled] {
+    background-color: rgb(211,158,158);
+}
+#options>button:nth-child(4)[disabled] {
+    background-color: rgb(160,185,137);
+}
+
+.btn-circle {
+    height: 80px;
+    width: 100%;
+    border-color: rgb(211,211,211);
+    background-color: rgb(211,211,211);
+    /* border: 10px solid #990000; */
+    /* box-shadow: 4px 4px 4px #999; */
+    /* font-weight: bold; */
+    margin:10px 0px;
+    
+    text-align: center;
+    vertical-align: middle;
+    color:rgb(216, 50, 111);
+    /* line-height: 200px; /*or you could use 4em*/ */
+}
