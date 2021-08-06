@@ -152,7 +152,8 @@ let getR = function (req, res) {
         if (code == 404) response.getPageNotFound(res);
         else if (code == 403) response.getPermissionDenied(res);
         else if (code == 200) {
-          dan2.push("Result-I", [JSON.stringify(IoT_json), 10, 10]);
+          //dan2.push("Result-I", [JSON.stringify(IoT_json), 10, 10]);
+          dan.push("Result-I", [JSON.stringify(IoT_json), 10, 10]);
           console.log("[da] push Result-I", JSON.stringify(IoT_json));
           response.getRatio(res, qRatio);
         }
@@ -738,7 +739,7 @@ function on_data(odf_name, data) {
   }
 }
 
-function init_callback(result) {
+/*function init_callback(result) {
   console.log("[da] register:", result);
 }
 
@@ -756,5 +757,16 @@ dan2.register(
     accept_protos: ["mqtt"],
   },
   init_callback
-);
+);*/
 
+const da = new iottalkjs.DAI({
+  apiUrl: '140.113.199.211:81/csm',
+  deviceModel: 'VotingMachine',
+  deviceName: "1.Voting",
+  onSignal: on_signal,
+  onData: on_data,
+  idfList: IDFList,
+  odfList: ODFList,
+  acceptProtos: ['mqtt'],
+});
+da.run();
