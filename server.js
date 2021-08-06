@@ -28,7 +28,6 @@ let config = require("./config"),
   genUUID = require("./iottalk_api/uuid"),
   favicon = require("serve-favicon");
 
-// 沒有https的話使用http連線
 if (config.https) {
   server.listen(config.httpsPort, "0.0.0.0");
   httpRedirectServer.listen(config.httpPort, "0.0.0.0");
@@ -38,7 +37,6 @@ if (config.https) {
 } else server.listen(config.httpPort, "0.0.0.0");
 
 // Create tables
-// 使用sequelize.sync()在資料庫建立欄位，之後使用 .then() 來接續後面的動作
 models.questionnaire.sync({ force: false }).then(function () {});
 models.answer.sync({ force: false }).then(function () {});
 models.question.sync({ force: false }).then(function () {});
@@ -63,30 +61,24 @@ app.use(express.static("./web"));
 app.use(favicon("./web/images/favicon.ico"));
 app.use(cookieParser());
 app.use(bodyParser.json({}));
-// 使用express-session紀錄登入資料
-// 把express-session寫在路由之前，所有的request都會生成一個session並可以透過req.session這個變數來取得session內容，以及req.sessionID來取得session ID
 app.use(
   expressSession({
     secret: genUUID.default(),
-    resave: true, // true: 在一個request中，無論session有沒有被修改過，都會強制保存原本的session在session store
-    saveUninitialized: true, // true表示使用者還沒登入就存進session store中
+    resave: true,
+    saveUninitialized: true,
   })
 );
 // OAuth
 require("./oauth.js")(app, config);
 
 // Admin API/Page basic auth
-// 驗證管理員帳號
 let bAuth = function (req, res, next) {
-  let user = basicAuth(req); 
-  // 回傳undefined或是name/pass
-  // 例如 { name: 'something', pass: 'whatever' }
+  let user = basicAuth(req);
   if (!user || !user.name || !user.pass) {
     res.set("WWW-Authenticate", "Basic realm=Authorization Required");
-    res.sendStatus(401); // 401 Unauthorized：用戶驗證失敗
+    res.sendStatus(401);
     return;
   }
-  // 使用管理員身分登入才能進入下一步驟
   if (user.name === config.adminAccount && user.pass === config.adminPassword) {
     next();
   } else {
@@ -103,13 +95,12 @@ models.questionnaire.findAll().then((qn) => {
 
 // RESTful API
 let getR = function (req, res) {
-    let login = req.user !== undefined, // 嚴格不等於 !==
+    let login = req.user !== undefined,
       id = req.params.id,
       questionIdx = req.params.questionIdx,
       queryObj = {},
       qRatio = {},
       IoT_json = { questionId: -1, percentage: [] };
-	// 查詢指定 primary key 的資料 
     models.questionnaire
       .findByPk(id)
       .then((qn) => {
@@ -167,7 +158,7 @@ let getR = function (req, res) {
         }
       });
   },
-  getNxtQ = function (req, res) { // 去到下一個問題
+  getNxtQ = function (req, res) {
     let login = req.user !== undefined,
       id = req.params.id,
       questionIdx = req.params.questionIdx,
@@ -276,7 +267,7 @@ let getR = function (req, res) {
         }
       });
   },
-  deleteQN = function (req, res) { //刪除問題群組
+  deleteQN = function (req, res) {
     let id = req.body.questionnaireId;
     models.questionnaire
       .destroy({ where: { id: id }, force: true })
@@ -411,7 +402,7 @@ let getR = function (req, res) {
         if (code === 404) response.getPageNotFound(res);
       });
   },
-  deleteQ = function (req, res) { //刪除問題
+  deleteQ = function (req, res) {
     let id = req.body.id;
     models.question.destroy({ where: { id: id }, force: true }).then(() => {
       console.log("[sys] Delete Question " + id);
@@ -434,7 +425,6 @@ app.post("/admin/deleteQ", bAuth, deleteQ);
 let index = function (req, res) {
     if (QusetionnaireID_def != undefined) {
       // auto to do redirect
-	  // 轉去相對應號碼的投票頁面
       res.redirect("/vote/" + QusetionnaireID_def);
     } else {
       // list all question
@@ -630,12 +620,6 @@ let index = function (req, res) {
     response.getAdminPollingPage(res);
   };
 
-// ^：匹配輸入的開頭
-// $：匹配輸入的結尾
-// +：匹配前一字元 1 至多次
-// {n,m}：n為至少、m為至多
-// ?：匹配前一字元 0 至 1 次，等同於 {0,1}
-// [xyz]：匹配中括號內所有字元
 app.get("^/index(/){0,1}$|^/$", index);
 app.get("^/admin/questionnaire/:id([0-9]+)/create(/){0,1}$", bAuth, create);
 app.get("^/dashboard/:id([0-9]+)(/){0,1}$", dashboard);
@@ -705,7 +689,7 @@ if (config.https) {
 
 let pollStart = function (req, res) {
   socketclient.emit("START", req.params.id);
-  res.send({ "curQuestion": curQuestionIdx });
+  res.send({ curQuestion: curQuestionIdx });
 };
 let pollNext = function (req, res) {
   nextQId =
@@ -715,11 +699,11 @@ let pollNext = function (req, res) {
   } else {
     socketclient.emit("NEXT", req.params.id);
   }
-  res.send({ "curQuestion": nextQId });
+  res.send({ curQuestion: nextQId });
 };
 let pollPause = function (req, res) {
   socketclient.emit("PAUSE");
-  res.send({ "curQuestion": curQuestionIdx });
+  res.send({ curQuestion: curQuestionIdx });
 };
 
 app.get("/pollstart/:id([0-9]+)(/){0,1}", pollStart);
@@ -767,9 +751,10 @@ dan2.register(
     idf_list: IDFList,
     odf_list: ODFList,
     profile: {
-      model: "VotingMachine",
+      model: "TheaterVotingMachine",
     },
     accept_protos: ["mqtt"],
   },
   init_callback
 );
+
