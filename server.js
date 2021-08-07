@@ -153,7 +153,8 @@ let getR = function (req, res) {
         if (code == 404) response.getPageNotFound(res);
         else if (code == 403) response.getPermissionDenied(res);
         else if (code == 200) {
-          dan2.push("Result-I", [JSON.stringify(IoT_json), 10, 10]);
+		  dan2.push("Result-I", "test");
+          //dan2.push("Result-I", [JSON.stringify(IoT_json), 10, 10]);
           //dan.push("Result-I", [JSON.stringify(IoT_json), 10, 10]);
           console.log("[da] push Result-I", JSON.stringify(IoT_json));
           response.getRatio(res, qRatio);

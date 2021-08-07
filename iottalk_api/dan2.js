@@ -45,7 +45,10 @@ var dan2 = (function () {
   var _rev;
 
   var publish = function publish(channel, message, retained) {
-    if (!_mqtt_client) return;
+    if (!_mqtt_client) {
+	  cosole.log("!_mqtt_client");
+	  return;
+	}
     if (retained === undefined) retained = false;
 
     _mqtt_client.publish(channel, message, {
@@ -238,8 +241,11 @@ var dan2 = (function () {
   exports.deregister = deregister;
 
   var push = function push(idf_name, data) {
-    if (!_mqtt_client || !_i_chans.topic(idf_name)) return;
-    publish(_i_chans.topic(idf_name), JSON.stringify(data));
+    if (!_mqtt_client || !_i_chans.topic(idf_name)) {
+      console.log("Not Register");
+      return;
+	}
+    publish(_i_chans.topic(idf_name), data);
   };
 
   exports.push = push;
