@@ -7,11 +7,8 @@ var dan2 = (function () {
   exports.reconnecting = exports.connected = exports.UUID = exports.push = exports.deregister = exports.register = void 0;
 
   var _channelPool = _interopRequireDefault(require("./channel-pool.js"));
-
   var _uuid = _interopRequireDefault(require("./uuid.js"));
-
   var _mqtt = _interopRequireDefault(require("mqtt"));
-
   var _superagent = _interopRequireDefault(require("superagent"));
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -19,41 +16,41 @@ var dan2 = (function () {
   function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
   var _url;
-
   var _id;
-
   var _mqtt_host;
-
   var _mqtt_port;
-
   var _mqtt_scheme;
-
   var _mqtt_client;
-
   var _i_chans;
-
   var _o_chans;
-
   var _ctrl_i;
-
   var _ctrl_o;
-
   var _on_signal;
-
   var _on_data;
-
   var _rev;
 
-  var publish = function publish(channel, message, retained) {
+  var publish = function publish(channel, message, retain, qos) {
     if (!_mqtt_client) {
-	  cosole.log("!_mqtt_client");
+	  cosole.log("unable to publish without mqtt_client");
 	  return;
-	}
-    if (retained === undefined) retained = false;
+    }
+    if (retain === undefined) retain = false;
+    if (qos === undefined) qos = 2;
 
-    _mqtt_client.publish(channel, message, {
-      retain: retained,
-      qos: 1
+    //_mqtt_client.publish(channel, message, {
+    //  retain: retain,
+    //  qos: 1
+    //});
+	  
+    return new Promise((resolve, reject) => {
+      _mqtt_client.publish(channel, message,
+        { retain, qos },
+        (err) => {
+          if (err) {
+            return reject(err);
+          }
+          return resolve();
+        });
     });
   };
 
@@ -145,13 +142,22 @@ var dan2 = (function () {
       if (callback) callback(false, err);
     };
 
-    _superagent.default.put(_url + '/' + _id).set('Content-Type', 'application/json').set('Accept', '*/*').send(JSON.stringify({
-      'name': params['name'],
-      'idf_list': params['idf_list'],
-      'odf_list': params['odf_list'],
-      'accept_protos': params['accept_protos'],
-      'profile': params['profile']
-    })).end(function (err, res) {
+    const body = {
+      name: params['name'],
+      idf_list: params['idf_list'],
+      odf_list: params['odf_list'],
+      accept_protos: params['accept_protos'] || 'mqtt',
+      profile: params['profile'],
+    };
+
+    // filter out the empty `df_list`, in case of empty list, server reponsed 403.
+    ['idf_list', 'odf_list'].forEach(
+      (x) => {
+        if (Array.isArray(body[x]) && body[x].length === 0) delete body[x];
+      },
+    );
+	  
+    _superagent.put(_url + '/' + _id).set('Content-Type', 'application/json').set('Accept', '*/*').send(body).end(function (err, res) {
       if (err) {
         on_failure(err);
         return;
@@ -204,7 +210,8 @@ var dan2 = (function () {
             'rev': _rev
           }),
           retain: true
-        }
+        },
+        keepalive: 30,
       });
 
       _mqtt_client.on('connect', on_connect);
@@ -221,6 +228,9 @@ var dan2 = (function () {
         // Convert message from Uint8Array to String
         on_message(topic, message.toString());
       });
+    })
+    .catch((err) => {
+      console.error('on_failure', err);
     });
   };
 
@@ -240,12 +250,14 @@ var dan2 = (function () {
 
   exports.deregister = deregister;
 
-  var push = function push(idf_name, data) {
+  var push = function push(idf_name, data, qos) {
+    console.log("start push function");
     if (!_mqtt_client || !_i_chans.topic(idf_name)) {
-      console.log("Not Register");
+      console.log("Not registered");
       return;
-	}
-    publish(_i_chans.topic(idf_name), data);
+    }
+    if (qos === undefined) qos = 1;
+    publish(_i_chans.topic(idf_name), data, false, qos);
   };
 
   exports.push = push;
