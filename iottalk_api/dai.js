@@ -31,7 +31,7 @@ let dai = function (no, mac, answers) {
                     setTimeout(setAliases, 2000);
             };
             dan.init(pull, config.IoTtalkURL, mac, {
-                'dm_name': 'VotingMachine',
+                'dm_name': 'VotingTest',
                 'd_name': no + ".Voting",
                 'u_name': 'yb',
                 'is_sim': false,
@@ -90,7 +90,7 @@ let dai = function (no, mac, answers) {
                 'idf_list': IDFList,
                 'name': no + ".Voting",
                 'profile': {
-                    'model': 'VotingMachine',
+                    'model': 'VotingTest',
                 },
                 'accept_protos': ['mqtt'],
             }, function(result){
