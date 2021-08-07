@@ -26,7 +26,8 @@ let config = require("./config"),
     daList = [],*/
   dan2 = require("./iottalk_api/dan2").dan2(),
   genUUID = require("./iottalk_api/uuid"),
-  favicon = require("serve-favicon");
+  favicon = require("serve-favicon")
+  iottalkjs = require("iottalk-js");
 
 if (config.https) {
   server.listen(config.httpsPort, "0.0.0.0");
@@ -739,7 +740,7 @@ function on_data(odf_name, data) {
   }
 }
 
-function init_callback(result) {
+/*function init_callback(result) {
   console.log("[da] register:", result);
 }
 
@@ -757,9 +758,9 @@ dan2.register(
     accept_protos: ["mqtt"],
   },
   init_callback
-);
+);*/
 
-/*const da = new iottalkjs.DAI({
+const da = new iottalkjs.DAI({
   apiUrl: '140.113.199.211:81/csm',
   deviceModel: 'VotingTest',
   deviceName: "1.Voting",
@@ -769,4 +770,4 @@ dan2.register(
   odfList: ODFList,
   acceptProtos: ['mqtt'],
 });
-da.run();*/
+da.run();
