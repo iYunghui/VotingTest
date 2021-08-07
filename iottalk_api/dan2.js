@@ -157,7 +157,7 @@ var dan2 = (function () {
       },
     );
 	  
-    _superagent.put(_url + '/' + _id).set('Content-Type', 'application/json').set('Accept', '*/*').send(body).end(function (err, res) {
+    _superagent.default.put(_url + '/' + _id).set('Content-Type', 'application/json').set('Accept', '*/*').send(body).end(function (err, res) {
       if (err) {
         on_failure(err);
         return;
@@ -228,10 +228,10 @@ var dan2 = (function () {
         // Convert message from Uint8Array to String
         on_message(topic, message.toString());
       });
-    })
-    .catch((err) => {
-      console.error('on_failure', err);
     });
+    //.catch((err) => {
+    //  console.error('on_failure', err);
+    //});
   };
 
   exports.register = register;
