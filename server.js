@@ -24,6 +24,7 @@ let config = require("./config"),
   models = require("./db_model").models,
   /*dai = require('./iottalk_api/dai').dai,
     daList = [],*/
+  dai = require('./iottalk_api/dai').dai,
   dan2 = require("./iottalk_api/dan2").dan2(),
   genUUID = require("./iottalk_api/uuid"),
   favicon = require("serve-favicon");
@@ -153,8 +154,8 @@ let getR = function (req, res) {
         if (code == 404) response.getPageNotFound(res);
         else if (code == 403) response.getPermissionDenied(res);
         else if (code == 200) {
-		  dan2.push("Result-I", "test");
-          //dan2.push("Result-I", [JSON.stringify(IoT_json), 10, 10]);
+          //dan2.push("Result-I", [JSON.stringify("test"), 10, 10]);
+          dan2.push("Result-I", [JSON.stringify(IoT_json), 10, 10]);
           //dan.push("Result-I", [JSON.stringify(IoT_json), 10, 10]);
           console.log("[da] push Result-I", JSON.stringify(IoT_json));
           response.getRatio(res, qRatio);
@@ -743,6 +744,20 @@ function on_data(odf_name, data) {
 
 function init_callback(result) {
   console.log("[da] register:", result);
+
+  process.on('exit', () => {
+    dan2.deregister(() => {
+      console.log("deregister");
+      process.exit(1);
+    });
+  });
+
+  process.on('SIGINT', () => {
+    process.exit(1);
+  });
+  process.on('uncaughtException', () => {
+    process.exit(1);
+  });
 }
 
 dan2.register(
@@ -759,21 +774,9 @@ dan2.register(
     accept_protos: ["mqtt"],
   },
   init_callback
-);
+)
 
-/*const da = new iottalkjs.DAI({
-  apiUrl: '140.113.199.211:81/csm',
-  deviceModel: 'VotingTest',
-  deviceName: "1.Voting",
-  onSignal: on_signal,
-  onData: on_data,
-  idfList: IDFList,
-  odfList: ODFList,
-  acceptProtos: ['mqtt'],
-});
-da.run();*/
-
-function exit_callback(result) {
+/*function exit_callback(result) {
   console.log("[da] deregister:", result);
 }
 
@@ -781,4 +784,7 @@ console.log("t");
 process.on('SIGINT', function(){
   dan2.deregister(exit_callback);
   process.exit();
-});
+});*/
+
+
+
