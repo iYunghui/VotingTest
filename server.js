@@ -752,7 +752,7 @@ dan2.register(
     idf_list: IDFList,
     odf_list: ODFList,
     profile: {
-      model: "VotingTest",
+      model: "VotingMachine",
     },
     accept_protos: ["mqtt"],
   },

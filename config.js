@@ -26,7 +26,7 @@ exports.color = {
     option10Color: "rgb(128, 128, 0)"
 };
 exports.IoTtalkVersion = "2";
-exports.IoTtalkURL = "https://demo.iottalk.tw/";
+exports.IoTtalkURL = "https://demo.iottalk.tw/csm";
 exports.googleClientID = "1";
 exports.googleClientSecret = "1";
 exports.googleCallbackURL = "1";
