@@ -29,6 +29,8 @@ var dan2 = (function () {
   var _on_data;
   var _rev;
 
+  var isReconnect = false;
+
   var publish = function publish(channel, message, retain, qos) {
     if (!_mqtt_client) {
 	  cosole.log("unable to publish without mqtt_client");
@@ -49,14 +51,29 @@ var dan2 = (function () {
           if (err) {
             return reject(err);
           }
+          console.log("dan2 publish success.");
           return resolve();
         });
     });
   };
 
-  var subscribe = function subscribe(channel) {
-    if (!_mqtt_client) return;
-    return _mqtt_client.subscribe(channel);
+  var subscribe = function subscribe(channel, qos) {
+    if (!_mqtt_client) {
+      console.log("unable to publish without mqtt_client");
+      return;
+    }
+    if (qos === undefined) qos = 2;
+    return new Promise((resolve, reject) => {
+      _mqtt_client.subscribe(channel, 
+        { qos },
+        (err) => {
+          if (err) {
+            return reject(err);
+          }
+          return resolve();
+        });
+    });
+    //return _mqtt_client.subscribe(channel);
   };
 
   var unsubscribe = function unsubscribe(channel) {
@@ -130,12 +147,22 @@ var dan2 = (function () {
   };
 
   var register = function register(url, params, callback) {
+    if(_mqtt_client) {
+      console.log("Already registered");
+      return;
+    }
+
     _url = url;
     _id = 'id' in params ? params['id'] : (0, _uuid.default)();
     _on_signal = params['on_signal'];
     _on_data = params['on_data'];
     _i_chans = new _channelPool.default();
     _o_chans = new _channelPool.default();
+
+    if(!_url || _url==="") {
+      console.log("Invalid url");
+      return;
+    }
 
     var on_failure = function on_failure(err) {
       console.error('on_failure', err);
@@ -178,18 +205,38 @@ var dan2 = (function () {
       _mqtt_scheme = metadata.url['ws_scheme'];
 
       function on_connect() {
-        //console.info('mqtt_connect');
+        console.log('mqtt_connect');
+        
+        let pub;
+        if(!isReconnect) {
+          pub = subscribe(_ctrl_o).then(() => {
+            console.log(`Successfully connect to ${_url}`)
+          });
+        } else {
+          console.log("Reconnect");
+          pub = publish(_ctrl_i, 
+            JSON.stringify({ state: 'offline', rev: _rev }), true);
+        }
 
-        _i_chans.remove_all_df();
+        pub.then(() => {
+          _i_chans.remove_all_df();
+          _o_chans.remove_all_df();
+          publish(_ctrl_i,
+            JSON.stringify({ state: 'online', rev: _rev }),
+            true,
+          ).then(() => {});
+          isReconnect = true;
+        });
 
+        /*_i_chans.remove_all_df();
         _o_chans.remove_all_df();
-
         publish(_ctrl_i, JSON.stringify({
           'state': 'online',
           'rev': _rev
         }), true // retained message
         );
         subscribe(_ctrl_o);
+        isReconnect = true;*/
 
         if (callback) {
           callback({
@@ -199,6 +246,10 @@ var dan2 = (function () {
             'd_name': metadata['name']
           });
         }
+      }
+
+      function on_disconnect() {
+        console.info('mqtt_disconnect ???');
       }
 
       _mqtt_client = _mqtt.default.connect(_mqtt_scheme + '://' + _mqtt_host + ':' + _mqtt_port, {
@@ -220,13 +271,15 @@ var dan2 = (function () {
         console.info('mqtt_reconnect');
       });
 
+      _mqtt_client.on('disconnect', on_disconnect);
+
       _mqtt_client.on('error', function (err) {
         console.error('mqtt_error', err);
       });
 
       _mqtt_client.on('message', function (topic, message, packet) {
         // Convert message from Uint8Array to String
-        on_message(topic, message.toString());
+        on_message(topic, message.toString(), packet);
       });
     });
     //.catch((err) => {

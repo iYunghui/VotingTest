@@ -772,3 +772,13 @@ dan2.register(
   acceptProtos: ['mqtt'],
 });
 da.run();*/
+
+function exit_callback(result) {
+  console.log("[da] deregister:", result);
+}
+
+console.log("t");
+process.on('SIGINT', function(){
+  dan2.deregister(exit_callback);
+  process.exit();
+});
