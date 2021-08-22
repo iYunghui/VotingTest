@@ -1,0 +1,9 @@
+body {
+  background-color: #f2f1f3;
+}
+#startBtn {
+  margin-top: 20px;
+}
+#prompt {
+  color: darkcyan;
+}

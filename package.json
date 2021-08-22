@@ -1,0 +1,44 @@
+{
+	"name": "Voting",
+	"version": "1.0.0",
+	"description": "Web voting plugin",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/IoTtalk/Vote.git"
+	},
+	"license": "",
+	"private": true,
+	"dependencies": {
+		"basic-auth": "",
+		"cookie-parser": "",
+		"ejs": "",
+		"express": "",
+		"express-session": "",
+		"iottalk-js": "^2.3.2",
+		"mqtt": "^4.2.6",
+		"mysql2": "",
+		"passport": "",
+		"passport-facebook": "",
+		"passport-google-oauth": "",
+		"request": "^2.88.2",
+		"sequelize": "",
+		"serve-favicon": "",
+		"socket.io": "^4.0.1",
+		"socket.io-client": "^2.3.0",
+		"sqlite3": "^4.0.6",
+		"superagent": "^6.1.0"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.2.3",
+		"@babel/core": "^7.4.0",
+		"@babel/node": "^7.2.2",
+		"@babel/preset-env": "^7.4.1",
+		"@zeit/ncc": "^0.16.1",
+		"babel-loader": "^8.0.5",
+		"eslint": "^7.24.0",
+		"eslint-config-airbnb-base": "^14.2.1",
+		"eslint-plugin-import": "^2.22.1",
+		"webpack": "^4.29.6",
+		"webpack-cli": "^3.3.0"
+	}
+}
