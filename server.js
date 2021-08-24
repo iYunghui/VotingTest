@@ -31,6 +31,7 @@ let config = require("./config"),
   favicon = require("serve-favicon");
 
 var voting_result = "";
+var start_input = false, next_input = 0;
 
 if (config.https) {
   server.listen(config.httpsPort, "0.0.0.0");
@@ -656,6 +657,8 @@ socketIo.on("connection", function (socket) {
       questionnaireIdx: curQuestionnaireIdx,
       questionIdx: curQuestionIdx,
     });
+    console.log("pollStart");
+    start_input = true;
   });
   socket.on("NEXT", (qIdx) => {
     pauseVoted = false;
@@ -669,6 +672,9 @@ socketIo.on("connection", function (socket) {
       questionIdx: curQuestionIdx,
       pauseVoted: pauseVoted,
     });
+    console.log("pollNext");
+    next_input = curQuestionIdx;
+    start_input = true;
   });
   socket.on("CUR_Q", () => {
     socketIo.emit("CUR_Q", {
@@ -683,6 +689,8 @@ socketIo.on("connection", function (socket) {
       questionnaireIdx: curQuestionnaireIdx,
       questionIdx: curQuestionIdx,
     });
+    console.log("pollPause");
+    start_input = false;
   });
 });
 
@@ -746,21 +754,35 @@ function on_data(odf_name, data) {
 }
 
 var Result_I = function () {
-  //if(input === undefined)
-  //  return;
-  //console.log(input);
-  //console.log(typeof input);
   console.log(voting_result);
   return [voting_result];
 }
 
+var Start_I = function () {
+  console.log(start_input);
+  if(start_input == false) return [0];
+  else return [1];
+}
+
+var Next_I = function () {
+  console.log(next_input);
+  return [next_input];
+}
+
+var Result_O = function (data) {
+  if(data[0] != "") {
+    console.log("clean result");
+    voting_result = "";
+  }
+}
+
 var Start_O = function (num) {
-  console.log(num);
-  voting_result = "";
+  if (num[0] == false) console.log("pause");
+  else console.log("start");
 }
 
 var Next_O = function (num) {
-  console.log(num);
+  if (num[0]) console.log("next to "+num[0]);
 }
 
 function init_callback(result) {
@@ -772,19 +794,41 @@ function end_callback(result) {
 }
 
 process.on('exit', () => {
+  console.log("exit");
+  votingMachine.dan.deregister(() => {
+    console.log("1");
+    process.exit(1);
+  });
+  votingMachine.deregister(() => {
+    console.log("1");
+    process.exit(1);
+  });
   process.exit(1);
 });
 //catches ctrl+c event
 process.on('SIGINT', () => {
   console.log("ctrl+c");
-  votingMachine.dan.deregister();
-  votingMachine.deregister();
+  votingMachine.dan.deregister(() => {
+    console.log("1");
+    process.exit(1);
+  });
+  votingMachine.deregister(() => {
+    console.log("1");
+    process.exit(1);
+  });
   //test.dan.deregister();
-  process.exit(0);
+  process.exit();
 });
 //catches uncaught exceptions
 process.on('uncaughtException', (e) => {
-  process.exit(1);
+  console.log("uncaughtException");
+  votingMachine.dan.deregister(() => {
+    process.exit(1);
+  });
+  votingMachine.deregister(() => {
+    process.exit(1);
+  });
+  process.exit();
 });
 
 var Dummy_Sensor = function (num) {
@@ -802,19 +846,21 @@ function Dummy_Control(data) {
 let votingMachine = new voting({
   apiUrl: config.IoTtalkURL,
   deviceModel: 'VotingTest',
-  deviceName: "1.Voting",
-  idfList: [[Result_I, ["string"]]],
-  odfList: [[Start_O, ["int"]],[Next_O, ["int"]]],
+  //deviceName: "2.Voting",
+  idfList: [[Result_I, ["string"]],[Start_I, ["boolean"]],[Next_I, ["int"]]],
+  odfList: [[Result_O, ["string"]],[Start_O, ["int"]],[Next_O, ["int"]]],
   pushInterval: 10,
   interval: {
     'Result_I': 3,
+    'Start_I': 3,
+    'Next_I': 3
   },
   onRegister: init_callback,
   onDeregister: end_callback
 });
 votingMachine.run();
 
-let test = new dummy_test2({
+/*let test = new dummy_test2({
   apiUrl: config.IoTtalkURL,
   deviceModel: 'Dummy_Device',
   deviceName: 'dummytest2',
@@ -826,5 +872,5 @@ let test = new dummy_test2({
   },
   onRegister: init_callback,
   onDeregister: end_callback
-});
+});*/
 //test.run();
