@@ -282,6 +282,7 @@ class Client {
       .send(JSON.stringify({ rev: this.ctx.rev }))
       .then(() => {
         this.ctx.mqttClient = null;
+        console.log("deregister success");
         if (this.ctx.onDeregister) {
           this.ctx.onDeregister(this);
         }
@@ -289,6 +290,7 @@ class Client {
         console.error('deregister fail', err);
       });
   }
+
 
   push(idf, data, qos) {
     if (!this.ctx.mqttClient || !this.firstPub) {

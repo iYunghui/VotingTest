@@ -73,6 +73,19 @@ class DAI{
   }
 
   onData(DFName, data) {
+    
+    /*console.log("[data]", odf_name, data);
+
+    switch (odf_name) {
+      case "Start-O":
+        if (data[0] == 1) socketclient.emit("START", QusetionnaireID_def);
+        break;
+      case "Next-O":
+        if (data[0] == 1) socketclient.emit("NEXT");
+        break;
+      default:
+        break;
+    }*/
     try {
       this.device_features[DFName].onData(data);
     } catch (err) {
@@ -166,7 +179,16 @@ class DAI{
   }
   
   deregister() {
-    this.dan.deregister();
+    if (this.persistentBinding) {
+      console.log("persistentBinding");
+      return;
+    }
+    try {
+      this.dan.deregister();
+      console.log("?");
+    } catch (error) {
+      console.error(`dai process cleanup exception: ${error}`);
+    }
   }
 
   parseDFProfile(option, typ) {
