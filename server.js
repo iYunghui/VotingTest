@@ -160,7 +160,7 @@ let getR = function (req, res) {
           //dan2.push("Result-I", [JSON.stringify(IoT_json), 10, 10]);
           //dummy_test.push("Dummy_Sensor", 1);
           Result_I(IoT_json.percentage.join());
-          voting_result = IoT_json.questionId.toString()+","+IoT_json.percentage.join();
+          //voting_result = IoT_json.questionId.toString()+","+IoT_json.percentage.join();
           //votingMachine.dan.push("Result-I", IoT_json.percentage.join());
           //Dummy_Sensor(1);
           console.log("[da] push Result-I", JSON.stringify(IoT_json));
@@ -245,10 +245,10 @@ let getR = function (req, res) {
   getP = function (req, res) {
     let questionIdx = req.params.questionIdx,
       qRatio = {},
-      queryObj = { questionId: questionIdx };
+      queryObj = { questionId: questionIdx };//console.log(queryObj);
     models.answer
       .findAll({ where: queryObj })
-      .then((a) => {
+      .then((a) => {//console.log("This ans:", JSON.stringify(a, 10, 10));
         let ratio = [],
           total = 0;
         if (a != null) {
@@ -691,6 +691,25 @@ socketIo.on("connection", function (socket) {
     });
     console.log("pollPause");
     start_input = false;
+    let qRatio = {}, queryObj = { questionId: (curQuestionIdx).toString() };
+    let IoT_json = { questionId: curQuestionIdx, percentage: [] };
+    models.answer
+          .findAll({ where: queryObj })
+          .then((a)=>{
+              let ratio = [], total = 0;
+              if (a != null) {
+                a.forEach(function (answer) {
+                  total += answer.count; 
+                  IoT_json.percentage.push(answer.count);
+                });
+                if(total != 0) {
+                  for (i = 0; i < IoT_json.percentage.length; i++)
+                    IoT_json.percentage[i] = Math.round((IoT_json.percentage[i] * 100) / total);
+                }
+              }
+              voting_result = IoT_json.questionId.toString()+","+IoT_json.percentage.join();
+              console.log(voting_result);
+          });
   });
 });
 
@@ -752,21 +771,32 @@ function on_data(odf_name, data) {
       break;
   }
 }
-
+var temp1 = "", temp2 = false, temp3 = -1;
 var Result_I = function () {
-  console.log(voting_result);
-  return [voting_result];
+  if(temp1 != voting_result) {
+    console.log("send "+voting_result);
+    return [voting_result];
+  }
 }
 
 var Start_I = function () {
-  console.log(start_input);
+  if(temp2 != start_input) {
+    console.log("send "+start_input);
+    if(start_input == false) return [0];
+    else return [1];
+  }
+  /*console.log("send "+start_input);
   if(start_input == false) return [0];
-  else return [1];
+  else return [1];*/
 }
 
 var Next_I = function () {
-  console.log(next_input);
-  return [next_input];
+  if(temp3 != next_input) {
+    console.log("send "+next_input);
+    return [next_input];
+  }
+  /*console.log("send "+next_input);
+  return [next_input];*/
 }
 
 var Result_O = function (data) {
@@ -794,83 +824,34 @@ function end_callback(result) {
 }
 
 process.on('exit', () => {
-  console.log("exit");
-  votingMachine.dan.deregister(() => {
-    console.log("1");
-    process.exit(1);
-  });
-  votingMachine.deregister(() => {
-    console.log("1");
-    process.exit(1);
-  });
+  votingMachine.dan.deregister();
   process.exit(1);
 });
 //catches ctrl+c event
 process.on('SIGINT', () => {
-  console.log("ctrl+c");
-  votingMachine.dan.deregister(() => {
-    console.log("1");
-    process.exit(1);
-  });
-  votingMachine.deregister(() => {
-    console.log("1");
-    process.exit(1);
-  });
-  //test.dan.deregister();
+  votingMachine.dan.deregister()
   process.exit();
 });
 //catches uncaught exceptions
 process.on('uncaughtException', (e) => {
-  console.log("uncaughtException");
-  votingMachine.dan.deregister(() => {
-    process.exit(1);
-  });
-  votingMachine.deregister(() => {
-    process.exit(1);
-  });
+  votingMachine.dan.deregister();
   process.exit();
 });
-
-var Dummy_Sensor = function (num) {
-  console.log(num);
-  const number = Math.floor((1 + Math.random()) * 0x10000);
-  if(num == null)
-      num = 0;
-  return [num];
-}
-
-function Dummy_Control(data) {
-  console.log(data);
-}
 
 let votingMachine = new voting({
   apiUrl: config.IoTtalkURL,
   deviceModel: 'VotingTest',
-  //deviceName: "2.Voting",
+  deviceName: "VotingTest",
+  deviceAddr: "36e2ac9e-0f47-533e-c07b-1462e22dccff",
   idfList: [[Result_I, ["string"]],[Start_I, ["boolean"]],[Next_I, ["int"]]],
   odfList: [[Result_O, ["string"]],[Start_O, ["int"]],[Next_O, ["int"]]],
-  pushInterval: 10,
+  pushInterval: 1,
   interval: {
-    'Result_I': 3,
-    'Start_I': 3,
-    'Next_I': 3
+    'Result_I': 1,
+    'Start_I': 1,
+    'Next_I': 1
   },
   onRegister: init_callback,
   onDeregister: end_callback
 });
 votingMachine.run();
-
-/*let test = new dummy_test2({
-  apiUrl: config.IoTtalkURL,
-  deviceModel: 'Dummy_Device',
-  deviceName: 'dummytest2',
-  idfList: [[Dummy_Sensor, ["int"]]],
-  odfList:[Dummy_Control],
-  pushInterval: 10,
-  interval: {
-    'Dummy_Sensor': 3,
-  },
-  onRegister: init_callback,
-  onDeregister: end_callback
-});*/
-//test.run();
