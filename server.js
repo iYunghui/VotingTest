@@ -689,10 +689,12 @@ socketIo.on("connection", function (socket) {
       questionnaireIdx: curQuestionnaireIdx,
       questionIdx: curQuestionIdx,
     });
-    console.log("pollPause");
+    console.log("pollPause: " + curQuestionIdx);
     start_input = false;
-    let qRatio = {}, queryObj = { questionId: (curQuestionIdx).toString() };
+    let id = curQuestionnaireIdx;
+    let qRatio = {}, queryObj = { };
     let IoT_json = { questionId: curQuestionIdx, percentage: [] };
+    queryObj = { questionId: (parseInt(curQuestionIdx)+1).toString() };
     models.answer
           .findAll({ where: queryObj })
           .then((a)=>{
@@ -707,6 +709,7 @@ socketIo.on("connection", function (socket) {
                     IoT_json.percentage[i] = Math.round((IoT_json.percentage[i] * 100) / total);
                 }
               }
+              IoT_json.questionId = parseInt(curQuestionIdx)+1;
               voting_result = IoT_json.questionId.toString()+","+IoT_json.percentage.join();
               console.log(voting_result);
           });
@@ -749,8 +752,8 @@ app.get("/pollpause(/){0,1}", pollPause);
 /*--------------------------------------------------------------------------------*/
 /* IoTtalk Setting */
 let IDFList = [[Result_I, ["string"]]];
-let ODFList = [[Start_O, ["int"]],
-               [Next_O, ["int"]],];
+//let ODFList = [[Start_O, ["int"]],
+//               [Next_O, ["int"]],];
 
 function on_signal(cmd, param) {
   console.log("[cmd]", cmd, param);
@@ -775,6 +778,7 @@ var temp1 = "", temp2 = false, temp3 = -1;
 var Result_I = function () {
   if(temp1 != voting_result) {
     console.log("send "+voting_result);
+    temp1 = voting_result;
     return [voting_result];
   }
 }
@@ -782,6 +786,7 @@ var Result_I = function () {
 var Start_I = function () {
   if(temp2 != start_input) {
     console.log("send "+start_input);
+    temp2 = start_input;
     if(start_input == false) return [0];
     else return [1];
   }
@@ -792,14 +797,15 @@ var Start_I = function () {
 
 var Next_I = function () {
   if(temp3 != next_input) {
-    console.log("send "+next_input);
+    console.log("send id "+next_input);
+    temp3 = next_input;
     return [next_input];
   }
   /*console.log("send "+next_input);
   return [next_input];*/
 }
 
-var Result_O = function (data) {
+/*var Result_O = function (data) {
   if(data[0] != "") {
     console.log("clean result");
     voting_result = "";
@@ -813,7 +819,7 @@ var Start_O = function (num) {
 
 var Next_O = function (num) {
   if (num[0]) console.log("next to "+num[0]);
-}
+}*/
 
 function init_callback(result) {
   console.log("[da] register:", result);
@@ -844,8 +850,8 @@ let votingMachine = new voting({
   deviceName: "VotingTest",
   deviceAddr: "36e2ac9e-0f47-533e-c07b-1462e22dccff",
   idfList: [[Result_I, ["string"]],[Start_I, ["boolean"]],[Next_I, ["int"]]],
-  odfList: [[Result_O, ["string"]],[Start_O, ["int"]],[Next_O, ["int"]]],
-  pushInterval: 1,
+  //odfList: [[Result_O, ["string"]],[Start_O, ["int"]],[Next_O, ["int"]]],
+  pushInterval: 2,
   interval: {
     'Result_I': 1,
     'Start_I': 1,

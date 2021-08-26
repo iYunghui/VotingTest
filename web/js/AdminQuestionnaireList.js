@@ -7,10 +7,13 @@ function close_msgModal(){
 
 $(document).ready(function(){
     var qIdx = 0;
+    var flag = 0;
     $("#start").click(()=>{
         socketIo.emit('START', $("#questionnaireIdx").val());
     });
     $("#next").click(()=>{
+        flag = 0;
+        $("#next").attr("disabled", true);
         if(!$("#qIdxInput").val()){
             $('#qIdx').text(++qIdx);
             socketIo.emit('NEXT');
@@ -21,6 +24,8 @@ $(document).ready(function(){
         }
     });
     $("#pause").click(()=>{
+        flag = 1;
+        $("#next").attr("disabled", false);
         socketIo.emit('PAUSE');
     });
     $('.register').on('click', function(){
