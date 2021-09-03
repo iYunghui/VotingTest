@@ -851,7 +851,7 @@ let votingMachine = new voting({
   deviceAddr: "36e2ac9e-0f47-533e-c07b-1462e22dccff",
   idfList: [[Result_I, ["string"]],[Start_I, ["boolean"]],[Next_I, ["int"]]],
   //odfList: [[Result_O, ["string"]],[Start_O, ["int"]],[Next_O, ["int"]]],
-  pushInterval: 2,
+  pushInterval: 1,
   interval: {
     'Result_I': 1,
     'Start_I': 1,
