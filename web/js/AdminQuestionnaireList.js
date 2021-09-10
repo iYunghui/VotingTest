@@ -113,5 +113,34 @@ $(document).ready(function(){
                 });
             }
         }
+    }); 
+    $('.clear').on('click', function(){
+        questionnaireId = $(this).attr('qnid');
+        // check whether QN is connected 
+        console.log("clear: "+questionnaireId);
+        if($(this).parent().siblings(".alert-secondary").find(".register").text() == "已連接"){
+            alert("This Questionnaire is connected!");
+        }
+        else{
+            var check=confirm("確定要清除嗎?")
+            if(check == true){
+                $.ajax({
+                    type: "POST",
+                    url: location.origin + "/admin/clearQN",
+                    cache: false,
+                    data: JSON.stringify({
+                        questionnaireId: questionnaireId
+                    }),
+                    contentType: "application/json",
+                    error: function(e){
+                        alert("something wrong");
+                        console.log(e);
+                    },
+                    success: function(data){
+                        location.reload();
+                    }
+                });
+            }
+        }
     });    
 });

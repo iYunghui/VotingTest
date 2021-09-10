@@ -29,9 +29,11 @@ let config = require("./config"),
   dummy_test2 = require("./iottalk_test/dai"),
   genUUID = require("./iottalk_api/uuid"),
   favicon = require("serve-favicon");
+const { Op } = require("sequelize");
 
 var voting_result = "";
 var start_input = false, next_input = 0;
+var pause = 0;
 
 if (config.https) {
   server.listen(config.httpsPort, "0.0.0.0");
@@ -277,6 +279,49 @@ let getR = function (req, res) {
         }
       });
   },
+  clearQN = function (req, res) {
+    let id = req.body.questionnaireId;
+    
+    models.questionnaire
+      .findByPk(id)
+      .then((qn) => {
+        questionnaire = qn;
+        if (qn) {
+          queryObj = { questionnaireId: id };console.log(queryObj);
+          return models.question.findAll({
+            where: queryObj,
+            order: [["id", "ASC"]],
+          });
+        }
+        return Promise.reject(404);
+      })
+      .then((q) => {
+        question = q;
+        if (q != null) {
+          queryObj = { questionId: {[Op.between]: [q[0].id, q[q.length-1].id]} };
+          return models.answer.findAll({ where: queryObj });
+        }
+        return Promise.reject(404);
+      })
+      .then((a) => {
+        answer = a;
+        if (!questionnaire.anonymous && login) { } 
+        else if (!questionnaire.anonymous && !login)
+          return Promise.reject(401);
+        else if (questionnaire.anonymous) {
+          queryObj = { id: {[Op.between]: [a[0].id, a[a.length-1].id]} };
+          models.answer.update({ count : 0 }, { where: queryObj });
+          return Promise.reject(200);
+        }
+      })
+      .catch((code) => {
+        if (code === 200) {
+          response.getSuccess(res);
+        } else if (code === 401) response.getPermissionDenied(res);
+        else if (code === 404) response.getPageNotFound(res);
+        else if (code === 409) response.getConflict(res);
+      });
+  },
   deleteQN = function (req, res) {
     let id = req.body.questionnaireId;
     models.questionnaire
@@ -425,6 +470,7 @@ app.get("/getNxtQ/:id([0-9]+)/:questionIdx([0-9]+)", getNxtQ);
 app.post("/postA", postA);
 app.post("/postQN", postQN);
 app.post("/admin/resetQN", bAuth, resetQN);
+app.post("/admin/clearQN", bAuth, clearQN);
 app.post("/admin/deleteQN", bAuth, deleteQN);
 app.get("/getP/:questionIdx([0-9]+)", getP);
 app.post("/admin/postQ", bAuth, postQ);
@@ -691,6 +737,7 @@ socketIo.on("connection", function (socket) {
     });
     console.log("pollPause: " + curQuestionIdx);
     start_input = false;
+    pause = 1;
     let id = curQuestionnaireIdx;
     let qRatio = {}, queryObj = { };
     let IoT_json = { questionId: curQuestionIdx, percentage: [] };
@@ -776,9 +823,10 @@ function on_data(odf_name, data) {
 }
 var temp1 = "", temp2 = false, temp3 = -1;
 var Result_I = function () {
-  if(temp1 != voting_result) {
+  if(temp1 != voting_result || pause==1) {
     console.log("send "+voting_result);
     temp1 = voting_result;
+    pause = 0;
     return [voting_result];
   }
 }
@@ -847,8 +895,8 @@ process.on('uncaughtException', (e) => {
 let votingMachine = new voting({
   apiUrl: config.IoTtalkURL,
   deviceModel: 'VotingTest',
-  deviceName: "VotingTest",
-  deviceAddr: "36e2ac9e-0f47-533e-c07b-1462e22dccff",
+  deviceName: "VotingTest2",
+  deviceAddr: "36e2ac9e-0f47-533e-c07b-1462e22dccee",
   idfList: [[Result_I, ["string"]],[Start_I, ["boolean"]],[Next_I, ["int"]]],
   //odfList: [[Result_O, ["string"]],[Start_O, ["int"]],[Next_O, ["int"]]],
   pushInterval: 1,
