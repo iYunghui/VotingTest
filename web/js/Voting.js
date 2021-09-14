@@ -29,7 +29,7 @@ let getCookie = function (cname) {
   let name = cname + "=";
   let ca = document.cookie.split(";");
   for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
+    let c = ca[i]; console.log(c);
     while (c.charAt(0) === " ") {
       c = c.substring(1);
     }
@@ -160,7 +160,7 @@ let voteAnswer = function (obj) {
   //$("#chooseAswer").text("你的答案: " + text);
   if (anonymous) {
     cookieId = id + "_" + questionIdx;
-    setCookie(cookieId, encodeURIComponent(text), 30);
+    setCookie(cookieId, encodeURIComponent(text), 1);
   }
   $("#options")
     .children("button")
